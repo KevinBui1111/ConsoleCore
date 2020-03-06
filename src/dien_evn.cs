@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
-namespace ConsoleApp
+namespace ConsoleCore
 {
     class dien_evn
     {
@@ -14,14 +15,17 @@ namespace ConsoleApp
         {
             //Console.WriteLine(new CT { DIEN_TTHU = 50, DON_GIA = 1235, SO_TIEN = 2345567 });
             //return;
+            using (var tw = new StreamWriter("out.txt"))
             using (var handler = new HttpClientHandler { UseCookies = false })
             using (var httpClient = new HttpClient(handler))
             {
+                Console.SetOut(tw);
                 var list_bill = new List<Electric>();
                 var url = "https://cskh.evnhcmc.vn/tracuu/ajax_ds_hoadon";
                 var url_tai = "https://cskh.evnhcmc.vn/tracuu/ajax_tai_hoadon";
 
-                httpClient.DefaultRequestHeaders.Add("Cookie", "_ga=GA1.2.1391265988.1583115567; SS=4mpoese22bt007ec9oenkdm7p0; _gid=GA1.2.882096003.1583464210; _gat_gtag_UA_153388238_1=1; login=a7a01d56ec3dd3e6d82e2bba7f57f38ace49da2627f7de70040e156d20607747a9e279ec70b76b0cb490096009772b8f6456122bb9a6679f617f9e9f5a8eeceaFHOzOC3Q%2B8zQAG1YMe83QNOpjWo%2Fa9YxsS8FyNa80mvZJmCqkwdcbk3GxSUEnVQBgj7lz1Wv%2BkeYPkzjrekrNqZZm7qOxYTNpv4q1n39WWASRS%2BIGwVEl4cbyt3A4B38El%2F7CP%2FQbUxJrA93XtibqdeX8OTfqEDx%2BFmNK6ibh0qL7JetIIbPBB86y4Q%2FktpR4K6%2FHKeW5ZTxyVk3a0Lo7Ovu8U684hGwuM6ylkC9k15LvdiS5UgIUAq2%2B5Yew9yifTv3DbtyKnWRMGUd7mmTPIOISPKusIalIPLrfuTJubZbW9aSHaoL0ykFBWsCdTkt; TS01128427=018b6f63b47dfb3e609ad18db1b39254e5ccb98c964494ec7ba08f133b721824a3beb52a3bc997ff73d8db4b96e4d8c7b0da3d3047928868d3503959dabc0509187b8e5642");
+                // get cookie from browser, after loging in
+                httpClient.DefaultRequestHeaders.Add("Cookie", "SS=n2f4dqm55skvvg5e4ms3lnrctg; _ga=GA1.2.1016517780.1583501620; _gid=GA1.2.605371135.1583501620; _gat_gtag_UA_153388238_1=1; login=f8f441314134d3905c50c9e378c635aa57122f8f6c7a017847f3120a7e90418aa7930ccddf573e38d29ca7c643429f783b4e9e6665bf4ba74158929e06b08d7fxrp1BjACg4gGyndSo3bZOOwgiHNoCpXd%2F72urKGXslxlgwvee%2BXPwDUh9u6XWo3iswtmFgZ8qghkWs9VE3UPYVhURGqJuZRnewRAJvsIbKVXhAvM%2BDvSSsrOXDvoWPjPSxdV%2FgEzp3vmwHNVDX4tR18Vp3evT2mxYE6MT0KSaieIRx0%2FWmYkoHWmVZaslrm%2BnWyEmbvLvrKJcWKtQ4kqn7aTJxaJ5EE%2FEIB05QjG6Q%2F4CvXO0xoRmM%2Bbq7AHVeMds1X47L7GCjvmGCar8%2B38je2GY3kQjoj1EMCB3w%2FqV7C6J%2BCydYV6APJ%2BMY%2BUcNUm; TS01128427=018b6f63b4b3f28f75113094ca8938a313316bcb81615bb816489d9fde4d16aeea10758afcada1e97a400b6c15773ffa08425a054c449199caa9b2bce7825d600ec33f4d40");
 
                 int mm = 3, yy = 2016;
                 while ($"{yy}{mm:0#}".CompareTo("202003") < 0)
@@ -38,15 +42,12 @@ namespace ConsoleApp
                     var m = Regex.Match(html_content, @"xem_thongtin_hddt\(""(\d+)""");
                     var ID_HDON = m.Groups[1].Value;
 
-                    Console.WriteLine($"Get {yy}/{mm:0#} - {ID_HDON}");
+                    //Konsole.WriteLine($"Get {yy}/{mm:0#} - {ID_HDON}");
 
                     // =============== load detail ===============
                     HttpContent content_tai = new FormUrlEncodedContent(new Dictionary<string, string>
                     {
                         {"input_id_hd", $"{ID_HDON}" },
-                        //{"input_loai", "" },
-                        //{"input_thang", $"{mm}" },
-                        //{"input_nam", $"{yy}" },
                     }.AsEnumerable());
                     response = httpClient.PostAsync(url_tai, content_tai).Result;
                     html_content = response.Content.ReadAsStringAsync().Result;
@@ -73,10 +74,10 @@ namespace ConsoleApp
                     var cts = xDoc.Descendants("CHITIET").Select(c => new CT
                     {
                         ID_HDONCTIET = c.Attribute("ID_HDONCTIET").Value,
-                        DON_GIA = int.Parse(c. Attribute("DON_GIA").Value),
+                        DON_GIA = int.Parse(c.Attribute("DON_GIA").Value),
                         DIEN_TTHU = int.Parse(c.Attribute("DIEN_TTHU").Value),
                         SO_TIEN = int.Parse(c.Attribute("SO_TIEN").Value),
-                    });
+                    }).OrderBy(c => c.ID_HDONCTIET);
                     Debug.Assert(!cts.Any(c => c.DON_GIA * c.DIEN_TTHU != c.SO_TIEN));
 
                     el.CT.AddRange(cts);
@@ -86,7 +87,9 @@ namespace ConsoleApp
                     ++mm;
                     if (mm == 13) { mm = 1; ++yy; }
 
-                    Console.WriteLine(el);
+                    //Konsole.indent(2);
+                    Konsole.WriteLine($"{el}");
+                    Konsole.back();
                 }
             }
             Console.ReadKey(true);
@@ -105,8 +108,10 @@ namespace ConsoleApp
 
         public List<CT> CT { get; }
 
-        public override string ToString() => $"{NAM}/{THANG:0#} - {DIEN_TTHU} - {TONG_TIEN:N0}\n  " + 
-            string.Join("\n  ", CT);
+        //public override string ToString() => $"{NAM}/{THANG:0#} - {DIEN_TTHU} - {TONG_TIEN:N0}\n  " + 
+        //    string.Join("\n  ", CT);
+        public override string ToString() => $"{NAM}/{THANG:0#}\t{DIEN_TTHU}\t{TONG_TIEN:N0}\t" +
+            string.Join("\t", CT);
     }
 
     class CT
@@ -116,6 +121,7 @@ namespace ConsoleApp
         public int DIEN_TTHU { get; set; }
         public int SO_TIEN { get; set; }
 
-        public override string ToString() => $"{DIEN_TTHU}\t{DON_GIA:N0}\t{SO_TIEN:N0}";
+        //public override string ToString() => $"{DIEN_TTHU}\t{DON_GIA:N0}\t{SO_TIEN:N0}";
+        public override string ToString() => $"{DIEN_TTHU}\t{DON_GIA:N0}";
     }
 }
