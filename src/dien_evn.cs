@@ -11,7 +11,7 @@ namespace ConsoleCore
 {
     class dien_evn
     {
-        static void Main(string[] args)
+        static void MyMain(string[] args)
         {
             //Console.WriteLine(new CT { DIEN_TTHU = 50, DON_GIA = 1235, SO_TIEN = 2345567 });
             //return;
