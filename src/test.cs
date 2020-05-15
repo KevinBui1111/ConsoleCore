@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 
 namespace ConsoleCore
 {
-    class test
+    class testTupple
     {
         public int X { get; set; }
         public string Y { get; set; }
 
-        static void Main(string[] args)
+        static void Main_(string[] args)
         {
             // quick declaration, tuple style.
             var (iii, sss) = (123, "abc");
@@ -35,10 +36,7 @@ namespace ConsoleCore
             Console.WriteLine(tup);
             Console.WriteLine(tup22);
 
-            (_, sss) = new test { X = 10, Y = "abc" };
-
-            var str = "abcde";
-            Debug.Assert('e' == str[^1]);      // str[str.Length - 1]
+            (_, sss) = new testTupple { X = 10, Y = "abc" };
 
             Console.ReadKey();
         }
@@ -52,5 +50,19 @@ namespace ConsoleCore
         }
 
         public void Deconstruct(out int firstName, out string lastName) => (firstName, lastName) = (X, Y);
+    }
+
+    class test
+    {
+        static void Main(string[] args)
+        {
+            var y = "The,quick;brown;fox jumps over the lazy dog".Split();
+            string[] a = new string[] { "123,456", "678,9090" };
+            var x = a.SelectMany((e, index) => e.Split(',').Select(val => (index, val)));
+            foreach (var e in x)
+            {
+                Console.WriteLine($"{e.index} - {e.val}");
+            }
+        }
     }
 }
