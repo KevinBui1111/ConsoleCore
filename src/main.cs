@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ConsoleCore.magic_treasure;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -8,12 +9,12 @@ namespace ConsoleCore
 {
     class main
     {
-        static void Main(string[] args)
+        static void Main2(string[] args)
         {
             //expression.test();
-            //errand.test();
+            errand.ReplaceLineEnding();
             //DI.setup_di();
-            decor2.test();
+            //magic_operate.test();
             Console.WriteLine("======== OK =========");
             Console.ReadKey(false);
         }

@@ -1,6 +1,9 @@
-﻿using System;
+﻿using ServiceStack.Redis;
+using StackExchange.Redis;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -9,6 +12,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace ConsoleCore
 {
@@ -86,72 +90,117 @@ namespace ConsoleCore
 
         internal static void test()
         {
-            var b = change_primitive_type("2001/08/31T14:15:34.855Z", typeof(DateTime));
-            //var b = DateTime.TryParse("01831 14:15:34.855Z", out DateTime d);
-            Console.WriteLine(b);
-        }
 
-        static bool test_optional(this int x, int y = 0)
-        {
-            return x % 2 == 0;
-        }
-
-        static void get_type(List<object> list)
-        {
-            for (int i = 0; i < list.Count; ++i)
+            char c = 'A';
+            var a = new Response_Momo
             {
-                Console.WriteLine(list[i] == null ? null : list[i].GetType().Name);
-                list[i] = 1;
-            }
-        }
-        static (object val, bool success) change_primitive_type(string value, Type type)
-        {
-            var false_val = (Activator.CreateInstance(type), false);
-            try
-            {
-                if (type == typeof(bool))
-                    if ("1,0,true,false".Contains(value.ToLower()))
-                        return (value.ToLower() == "1" || value.ToLower() == "true", true);
-                    else
-                        return false_val;
+                requestId = $"{c++}-aaa",
+                resultCode = c++,
+                message = $"{c++}-aaa",
+                referenceId = $"{c++}-aaa",
+            };
+            Console.WriteLine(c);
+            return;
+            string host = "10.19.175.70:6379";
+            string key = "ContractSummaryTestModel:7770945310";
 
-                if (type == typeof(DateTime))
-                    return (DateTime.Parse(value), true);
-
-                return (Convert.ChangeType(value, type), true);
-            }
-            catch
+            var manager = new RedisManagerPool(host);
+            using (var client = manager.GetClient())
             {
-                return false_val;
+                //bool res = client.Set("1111", new CA { prop1 = "123", prop2 = "aaa" });
+                //var x = client.GetValueFromHash(key, "momoDisburseResponse.resultCode");
+                //Console.WriteLine(x);
+                //Console.WriteLine($"---{res}----");
+                Console.WriteLine(client.Remove(key));
+                //client.RemoveItemFromSet("ContractSummaryTestModel", "9999064269");
+                //client.remo("ContractSummaryTestModel", "9999064269");
+                foreach (var k in client.GetAllEntriesFromHash(key))
+                {
+                    Console.WriteLine($"{k.Key} - {k.Value}");
+                }
+                Console.WriteLine("-------");
+                foreach (string k in client.GetAllKeys())
+                {
+                    Console.WriteLine($"{k} - {client.GetEntryType(k)}");
+
+                }
             }
-        }
-        static (T, bool) change_primitive_type<T>(string value)
-        {
-            var res = change_primitive_type(value, typeof(T));
-            return ((T)res.val, res.success);
-            //try
+            //using (var redis = ConnectionMultiplexer.Connect("10.19.175.70:6379"))
             //{
-            //    if (typeof(T) == typeof(bool))
-            //        if ("1,0,true,false".Contains(value.ToLower()))
-            //            return ((T)(object)(value.ToLower() == "1" || value.ToLower() == "true"), true);
-            //        else
-            //            return (default(T), false);
-
-            //    if (typeof(T) == typeof(DateTime))
-            //        return ((T)(object)DateTime.Parse(value), true);
-
-            //    return ((T)Convert.ChangeType(value, typeof(T)), true);
+            //    var db = redis.GetDatabase();
+            //    foreach (var end in redis.GetEndPoints())
+            //    {
+            //        Console.WriteLine(end);
+            //    }
+            //    //var a = db.StringSet(key, 988);
+            //    foreach(var field in db.HashGetAll(key))
+            //    {
+            //        Console.WriteLine($"{field.Name} - {field.Value}");
+            //    }
+            //    //db.StringIncrement(key);
+            //    Console.WriteLine(db.KeyRandom());
             //}
-            //catch
-            //{
-            //    return (default(T), false);
-            //}
+        }
+
+        static async Task<string> taskAsync()
+        {
+            await Task.CompletedTask;
+            if (2 > 1)
+                throw new Exception("aaaa");
+            return "aabbc";
+        }
+        public static IEnumerable<IEnumerable<T>> Combinations<T>(this IEnumerable<T> elements, int k)
+        {
+            return k == 0 ? new[] { new T[0] } :
+              elements.SelectMany((e, i) =>
+                elements
+                    .Skip(i + 1)
+                    .Combinations(k - 1)
+                    .Select(c => (new[] { e }).Concat(c)));
+        }
+        static void GetCombination(List<int> list)
+        {
+            double count = Math.Pow(2, list.Count);
+            for (int i = 1; i <= count - 1; i++)
+            {
+                string str = Convert.ToString(i, 2).PadLeft(list.Count, '0');
+                for (int j = 0; j < str.Length; j++)
+                {
+                    if (str[j] == '1')
+                    {
+                        Console.Write(list[j]);
+                    }
+                }
+                Console.WriteLine();
+            }
+        }
+
+        public static void ReplaceLineEnding()
+        {
+            string ext = ".cs,.cshtml,.aspx,.css,.js,.html,.htm,.xml,.txt,.ascx,.asax,.skin,.resx,.sitemap,.Master";
+            string path = @"E:\Downloads\dms-dotnet\src\DMS";
+            var files = Directory.EnumerateFiles(path, "*.*", SearchOption.AllDirectories)
+                .Where(f => ext.Contains(Path.GetExtension(f)));
+
+            foreach(string f in files)
+            {
+                File.WriteAllText(f,
+                    string.Join('\n', File.ReadAllLines(f))
+                );
+            }
         }
     }
     public class CA
     {
         public string prop1 { get; set; } = "defffault";
         public string prop2 { get; set; }
+    }
+    public class Response_Momo
+    {
+        public string requestId { get; set; }
+        public int resultCode { get; set; }
+        public string message { get; set; }
+        public string referenceId { get; set; }
     }
     static class RES
     {
