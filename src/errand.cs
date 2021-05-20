@@ -88,18 +88,41 @@ namespace ConsoleCore
             }
         }
 
+        static void timer_callback(object state)
+        {
+            Console.WriteLine($"{Thread.CurrentThread.ManagedThreadId} - {DateTime.Now:HH:mm:ss.fff}");
+            Thread.Sleep(2000);
+        }
         internal static void test()
         {
+            Console.WriteLine("Abc" == "aBC");
+            Console.WriteLine($"{Thread.CurrentThread.ManagedThreadId} - {DateTime.Now:HH:mm:ss.fff} - {Stopwatch.Frequency}");
 
-            char c = 'A';
-            var a = new Response_Momo
+            //Timer t = new Timer(timer_callback, 10, 0, 5000);
+            //Console.ReadKey(true);
+            //t.Change(Timeout.Infinite, Timeout.Infinite);
+            //Console.ReadKey(true);
+            //return;
+            int TIME_NAP = 60_000;
+            Stopwatch sw = Stopwatch.StartNew();
+            DateTime startTime = DateTime.Now;
+            //Console.WriteLine($"start at: {DateTime.Now:HH:mm:ss.fff}");
+
+            while (true)
             {
-                requestId = $"{c++}-aaa",
-                resultCode = c++,
-                message = $"{c++}-aaa",
-                referenceId = $"{c++}-aaa",
-            };
-            Console.WriteLine(c);
+                var now = DateTime.Now;
+                TimeSpan swElapsed = sw.Elapsed
+                        ,dateElasped = now - startTime;
+
+                Console.WriteLine($"{dateElasped:d\\.hh\\:mm\\:ss\\.fff} - {swElapsed:d\\.hh\\:mm\\:ss\\.fff}");
+
+                int wait_time = (int)(TIME_NAP - sw.ElapsedMilliseconds % TIME_NAP);
+                Console.WriteLine("--" + wait_time);
+                var wait_task = Task.Delay(wait_time);
+                
+                Task.WaitAny(wait_task); // Take a nap
+            }
+
             return;
             string host = "10.19.175.70:6379";
             string key = "ContractSummaryTestModel:7770945310";

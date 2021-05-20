@@ -33,6 +33,16 @@ namespace ConsoleCore
             Console.WriteLine(bar == bar2);
             var abs = (absBaseRepo)bar;
             abs.save();
+
+            var logger = serviceProvider.GetService<ILogger<IBoxRepo>>();
+            try
+            {
+                throw new ApplicationException("intend exception");
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "");
+            }
         }
     }
 
@@ -65,9 +75,9 @@ namespace ConsoleCore
 
         public void DoThing(string number)
         {
-            Console.WriteLine("DoThing");
-            _logger.LogInformation($"Doing the thing {number}");
-            Console.WriteLine("DoThing 2");
+            //Console.WriteLine("DoThing");
+            _logger.LogInformation(4, $"Doing the thing {number}");
+            //Console.WriteLine("DoThing 2");
         }
     }
 
@@ -96,10 +106,14 @@ namespace ConsoleCore
 
     class BoxRepo : absBaseRepo, IBoxRepo
     {
-        public BoxRepo(IFooService _foo) : base(_foo) { }
+        private readonly ILogger<BoxRepo> _logger;
+        public BoxRepo(IFooService _foo, ILogger<BoxRepo> logger) : base(_foo)
+        {
+            _logger = logger;
+        }
 
         //public void save() => Console.WriteLine("absBaseRepo SAVE");
-        public override void save() => Console.WriteLine("BoxRepo SAVE");
-        public void find_box() => Console.WriteLine("find_box");
+        //public override void save() => Console.WriteLine("BoxRepo SAVE");
+        public void find_box() => _logger.LogWarning(9, "find_box {} {-1}", "BoxRepo", "aaa");
     }
 }

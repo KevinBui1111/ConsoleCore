@@ -98,6 +98,9 @@ namespace ConsoleCore
             return profit;
         }
 
+        /*
+         * https://www.geeksforgeeks.org/next-greater-element/
+         */
         public static long[] next_greater_element(long[] list)
         {
             long[] res = new long[list.Length];
@@ -126,6 +129,103 @@ namespace ConsoleCore
                         res[j] = list[i];
                 }
                 res[i] = -1;
+            }
+            return res;
+        }
+        public static int[] next_greater_element3(int[] list)
+        {
+            Enumerable.Repeat(-1, list.Length);
+            int[] res = new int[list.Length];
+            var wait_stack = new Stack<int>();
+            for (int i = 0; i < 2 * list.Length; ++i)
+            {
+                int idx = i % list.Length;
+                int i_wait = -1;
+                while (wait_stack.Count > 0 && list[i_wait = wait_stack.Peek()] < list[idx])
+                {
+                    wait_stack.Pop();
+                    res[i_wait] = list[idx];
+                }
+
+                if (i == idx)
+                {
+                    res[idx] = -1;
+                    wait_stack.Push(idx);
+                }
+            }
+            return res;
+        }
+        // Complete the riddle function below.
+        public static long[] riddle_naive(long[] arr) =>
+            Enumerable.Range(1, arr.Length).Select(i =>
+                Enumerable.Range(0, arr.Length - i + 1).Max(j =>
+                    arr.Skip(j).Take(i).Min()
+                    )
+            ).ToArray();
+
+        public static long[] riddle_better(long[] arr)
+        {
+            // complete this function
+            long[] res = new long[arr.Length];
+            res[0] = arr.Max();
+            for (int i = 1; i < arr.Length; ++i)
+            {
+                long max = -1;
+                for (int j = 1; j <= arr.Length - i; ++j)
+                {
+                    if (arr[j  - 1] > arr[j])
+                        arr[j - 1] = arr[j];
+                    
+                    if (arr[j - 1] > max)
+                        max = arr[j - 1];
+                }
+                res[i] = max;
+            }
+            return res;
+        }
+        public static long[] riddle(long[] arr)
+        {
+            // next smaller;
+            int[] next = new int[arr.Length];
+            var wait_stack = new Stack<int>();
+            for (int i = 0; i < arr.Length; ++i)
+            {
+                int i_wait;
+                while (wait_stack.Count > 0 && arr[i_wait = wait_stack.Peek()] > arr[i])
+                {
+                    wait_stack.Pop();
+                    next[i_wait] = i;
+                }
+                next[i] = arr.Length;
+                wait_stack.Push(i);
+            }
+
+            // prev smaller;
+            int[] prev = new int[arr.Length];
+            wait_stack = new Stack<int>();
+            for (int i = 0; i < arr.Length; ++i)
+            {
+                while (wait_stack.Count > 0 && arr[wait_stack.Peek()] >= arr[i])
+                {
+                    wait_stack.Pop();
+                }
+
+                prev[i] = wait_stack.Count > 0 ? wait_stack.Peek() : -1;
+                wait_stack.Push(i);
+            }
+
+            long[] res = Enumerable.Repeat(-999L, arr.Length).ToArray();
+            for (int i = 0; i < arr.Length; ++i)
+            {
+                int win_size = next[i] - prev[i] - 2;
+                res[win_size] = arr[i] > res[win_size] ? arr[i]: res[win_size];
+            }
+
+            for (int i = arr.Length - 2; i > -1; --i)
+            {
+                res[i] = res[i] > res[i + 1] ? res[i] : res[i + 1];
+                //if (res[i] == -999)
+                //    res[i] = res[i + 1];
             }
             return res;
         }
@@ -222,8 +322,8 @@ namespace ConsoleCore
             {
                 Console.ReadLine();
 
-                var prices = Console.ReadLine().TrimEnd().Split(' ').Select(pricesTemp => Convert.ToInt64(pricesTemp)).ToArray();
-                var result = Result.next_greater_element2(prices);
+                var prices = Console.ReadLine().TrimEnd().Split(' ').Select(pricesTemp => Convert.ToInt32(pricesTemp)).ToArray();
+                var result = Result.next_greater_element3(prices);
 
                 textWriter.WriteLine(String.Join(" ", result));
             }
@@ -231,7 +331,21 @@ namespace ConsoleCore
             textWriter.Flush();
             textWriter.Close();
         }
-        public static void Main()
+        static void Main_minMaxRiddle(string[] args)
+        {
+            TextWriter textWriter = new StreamWriter(@System.Environment.GetEnvironmentVariable("OUTPUT_PATH"));
+
+            int n = Convert.ToInt32(Console.ReadLine());
+
+            long[] arr = Array.ConvertAll(Console.ReadLine().Split(" ,\t".ToCharArray(), StringSplitOptions.RemoveEmptyEntries), arrTemp => Convert.ToInt64(arrTemp));
+            long[] res = Result.riddle(arr);
+
+            textWriter.WriteLine(string.Join(" ", res));
+
+            textWriter.Flush();
+            textWriter.Close();
+        }
+        public static void Main3()
         {
             Environment.SetEnvironmentVariable("OUTPUT_PATH", "out.txt");
             Stopwatch sw = new Stopwatch();
@@ -240,10 +354,13 @@ namespace ConsoleCore
             using (var sr = new StreamReader("in.txt"))
             {
                 Console.SetIn(sr);
-                Main_nge(null);
+                Main_minMaxRiddle(null);
             }
             sw.Stop();
             Console.WriteLine($"complete in {sw.Elapsed}!");
+
+            (int min, int max) minmax = (int.MinValue, int.MaxValue);
+            Console.WriteLine(minmax);
 
             Console.ReadKey();
         }

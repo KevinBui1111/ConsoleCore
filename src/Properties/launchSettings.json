@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "ConsoleCore": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Value"
+      }
+    }
+  }
+}
