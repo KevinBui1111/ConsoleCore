@@ -95,32 +95,11 @@ namespace ConsoleCore
         }
         internal static void test()
         {
-            Console.WriteLine("Abc" == "aBC");
-            Console.WriteLine($"{Thread.CurrentThread.ManagedThreadId} - {DateTime.Now:HH:mm:ss.fff} - {Stopwatch.Frequency}");
-
-            //Timer t = new Timer(timer_callback, 10, 0, 5000);
-            //Console.ReadKey(true);
-            //t.Change(Timeout.Infinite, Timeout.Infinite);
-            //Console.ReadKey(true);
-            //return;
-            int TIME_NAP = 60_000;
-            Stopwatch sw = Stopwatch.StartNew();
-            DateTime startTime = DateTime.Now;
-            //Console.WriteLine($"start at: {DateTime.Now:HH:mm:ss.fff}");
-
             while (true)
             {
-                var now = DateTime.Now;
-                TimeSpan swElapsed = sw.Elapsed
-                        ,dateElasped = now - startTime;
-
-                Console.WriteLine($"{dateElasped:d\\.hh\\:mm\\:ss\\.fff} - {swElapsed:d\\.hh\\:mm\\:ss\\.fff}");
-
-                int wait_time = (int)(TIME_NAP - sw.ElapsedMilliseconds % TIME_NAP);
-                Console.WriteLine("--" + wait_time);
-                var wait_task = Task.Delay(wait_time);
-                
-                Task.WaitAny(wait_task); // Take a nap
+                Console.Write("Input number of door: ");
+                int n = int.Parse(Console.ReadLine());
+                hundredDoor(n);
             }
 
             return;
@@ -211,6 +190,27 @@ namespace ConsoleCore
                     string.Join('\n', File.ReadAllLines(f))
                 );
             }
+        }
+
+        public static void hundredDoor(int n)
+        {
+            bool[] doors = new bool[n];
+            for (int i = 1; i <= n; ++i)
+            {
+                for (int j = i - 1; j < n; j += i)
+                {
+                    doors[j] = !doors[j];
+                }
+                Console.Write($"{i:0#} -- ");
+                for (int k = 1; k <= n; ++k)
+                {
+                    Console.Write(doors[k - 1] ? 1 : 0);
+                    if ((k & (k - 1)) == 0) Console.Write(' ');
+                }
+                Console.WriteLine();
+            }
+
+            Console.WriteLine($"open: {doors.Count(d => d)}");
         }
     }
     public class CA

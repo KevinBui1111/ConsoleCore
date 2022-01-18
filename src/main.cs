@@ -11,7 +11,9 @@ namespace ConsoleCore
     {
         static void Main(string[] args)
         {
+            //Ago.RandomPercent();
             errand.test();
+            //decor2.test();
             //errand.ReplaceLineEnding();
             //DI.setup_di();
             //magic_operate.test();
