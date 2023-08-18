@@ -3,11 +3,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Org.BouncyCastle.Crypto.Digests;
 using ServiceStack.Redis;
+using SHA3.Net;
+using SHA3Core.Enums;
 
 namespace ConsoleCore
 {
@@ -206,6 +210,41 @@ namespace ConsoleCore
             }
 
             Console.WriteLine($"open: {doors.Count(d => d)}");
+        }
+        
+        public static void HashSha3Digest()
+        {
+            var input = "The string to hash";
+            var inputBytes = Encoding.UTF8.GetBytes(input);
+
+            var sha3 = new Sha3Digest(256);
+            sha3.BlockUpdate(inputBytes, 0, inputBytes.Length);
+            var hash = new byte[sha3.GetDigestSize()];
+            sha3.DoFinal(hash, 0);
+
+            string hashString = BitConverter.ToString(hash).Replace("-", "");
+            Console.WriteLine(hashString);
+        }
+        
+        public static void HashSha3()
+        {
+            var input = "The string to hash";
+            var inputBytes = Encoding.UTF8.GetBytes(input);
+
+            using var shaAlg = Sha3.Sha3256();
+            var hash = shaAlg.ComputeHash(inputBytes);
+            var hashString = BitConverter.ToString(hash).Replace("-", "");
+            Console.WriteLine(hashString);
+        }
+        
+        public static void SHA3Core()
+        {
+            var input = "The string to hash";
+            var inputBytes = Encoding.UTF8.GetBytes(input);
+
+            var sha3 = new SHA3Core.SHA3.SHA3(SHA3BitType.S256);
+            var hashString = sha3.Hash(inputBytes);
+            Console.WriteLine(hashString);
         }
     }
     public class CA
