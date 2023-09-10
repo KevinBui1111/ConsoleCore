@@ -17,16 +17,6 @@ namespace ConsoleCore
 {
     static class errand
     {
-        internal static void selectMany()
-        {
-            var y = "The,quick;brown;fox jumps over the lazy dog".Split();
-            string[] a = new string[] { "123,456", "678,9090" };
-            var x = a.SelectMany((e, index) => e.Split(',').Select(val => (index, val)));
-            foreach (var e in x)
-            {
-                Console.WriteLine($"{e.index} - {e.val}");
-            }
-        }
         internal static void crawl_sachvui()
         {
             var rand = new Random((int)DateTime.Now.Ticks);
