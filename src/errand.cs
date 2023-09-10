@@ -76,12 +76,7 @@ namespace ConsoleCore
                 return client.DownloadString(url);
             }
         }
-
-        static void timer_callback(object state)
-        {
-            Console.WriteLine($"{Thread.CurrentThread.ManagedThreadId} - {DateTime.Now:HH:mm:ss.fff}");
-            Thread.Sleep(2000);
-        }
+        
         internal static void test()
         {
             while (true)
@@ -90,47 +85,6 @@ namespace ConsoleCore
                 int n = int.Parse(Console.ReadLine());
                 hundredDoor(n);
             }
-
-            return;
-            string host = "10.19.175.70:6379";
-            string key = "ContractSummaryTestModel:7770945310";
-
-            var manager = new RedisManagerPool(host);
-            using (var client = manager.GetClient())
-            {
-                //bool res = client.Set("1111", new CA { prop1 = "123", prop2 = "aaa" });
-                //var x = client.GetValueFromHash(key, "momoDisburseResponse.resultCode");
-                //Console.WriteLine(x);
-                //Console.WriteLine($"---{res}----");
-                Console.WriteLine(client.Remove(key));
-                //client.RemoveItemFromSet("ContractSummaryTestModel", "9999064269");
-                //client.remo("ContractSummaryTestModel", "9999064269");
-                foreach (var k in client.GetAllEntriesFromHash(key))
-                {
-                    Console.WriteLine($"{k.Key} - {k.Value}");
-                }
-                Console.WriteLine("-------");
-                foreach (string k in client.GetAllKeys())
-                {
-                    Console.WriteLine($"{k} - {client.GetEntryType(k)}");
-
-                }
-            }
-            //using (var redis = ConnectionMultiplexer.Connect("10.19.175.70:6379"))
-            //{
-            //    var db = redis.GetDatabase();
-            //    foreach (var end in redis.GetEndPoints())
-            //    {
-            //        Console.WriteLine(end);
-            //    }
-            //    //var a = db.StringSet(key, 988);
-            //    foreach(var field in db.HashGetAll(key))
-            //    {
-            //        Console.WriteLine($"{field.Name} - {field.Value}");
-            //    }
-            //    //db.StringIncrement(key);
-            //    Console.WriteLine(db.KeyRandom());
-            //}
         }
 
         static async Task<string> taskAsync()
@@ -241,24 +195,5 @@ namespace ConsoleCore
     {
         public string prop1 { get; set; } = "defffault";
         public string prop2 { get; set; }
-    }
-    public class Response_Momo
-    {
-        public string requestId { get; set; }
-        public int resultCode { get; set; }
-        public string message { get; set; }
-        public string referenceId { get; set; }
-    }
-    static class RES
-    {
-        static Dictionary<int, string> dicRES;
-        static RES()
-        {
-            Console.WriteLine($"111-{RES.PartnerCodeIsNotExist}");
-            dicRES = new Dictionary<int, string>();
-            dicRES[PartnerCodeIsNotExist] = "Partner Code Is Not Exist";
-            Console.WriteLine("Constructor RES");
-        }
-        public static readonly int PartnerCodeIsNotExist = 1;
     }
 }
